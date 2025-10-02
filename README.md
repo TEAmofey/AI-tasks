@@ -2,6 +2,33 @@
 
 Этот документ объясняет, как подключиться к проекту, создать свою ветку для задачи, регулярно подтягивать изменения из апстрима и сдавать решение через Pull Request.
 
+## 0) Предварительно: SSH-ключ на macOS
+
+```bash
+# есть ли ключи
+ls -la ~/.ssh
+
+# если нет — создайте
+ssh-keygen -t ed25519 -C "your.email@example.com"
+
+# добавьте в агент и свяжите с keychain
+eval "$(ssh-agent -s)"
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+
+# скопируйте публичный ключ и добавьте его в GitHub → Settings → SSH and GPG keys
+pbcopy < ~/.ssh/id_ed25519.pub
+
+# проверка
+ssh -T git@github.com
+```
+
+Также стоит добавить имя и почту GitHub.
+
+```bash
+git config --global user.name "<first name> <last name>"
+git config --global user.email "your-email@example.com"
+```
+
 ---
 
 ## 1) Требования
@@ -43,31 +70,33 @@ git push origin main
 
 ## 4) Создание рабочей ветки под задачу
 
-Шаблон имени ветки: `task-XX/<ваш_login>` — один PR = одна задача.
+Шаблон имени ветки: `202x-xx-xx-<task_name>/<login>` — один PR = одна задача.
 
 ```bash
-git switch -c task-XX/<ваш_login>
-mkdir -p solutions/task-XX/<ваш_login>
-# добавьте/измените файлы в своей папке
-git add solutions/task-XX/<ваш_login>
-git commit -m "task-XX: initial solution"
-git push -u origin task-XX/<ваш_login>
+git switch -c 202x-xx-xx-<task_name>/<login>
+git add tasks/202x-xx-xx-<task_name>
+git commit -m "202x-xx-xx-<task_name>: initial solution"
+git push -u origin 202x-xx-xx-<task_name>/<login>
 ```
 
 ---
 
 ## 5) Сдача решения (Pull Request)
 
-Откройте PR **из вашей ветки форка** → **в репозиторий преподавателя** → **в ветку `submissions`**.
+PR **внутри своего форка** → в СВОЙ `main`
 
-Рекомендации к PR:
-- Заголовок: `task-XX: Фамилия Имя`
-- В описании укажите: ОС + версия Python, как запускать, что сделано
-- Изменения — только в `solutions/task-XX/<ваш_login>/...`
+Откройте Pull Request СО СВОЕЙ ветки **в ваш же `main`**:
+- **base:** `main` (ваш форк)
+- **compare:** `202x-xx-xx-<task_name>/<login>` (ваша ветка)
+
+В описании PR укажите:
+- кратко, что сделано;
+- как запустить проверку (команда `pytest -q`);
+- при необходимости — скрин/лог тестов.
 
 ---
 
-## 6) Как подтягивать новые задания
+## 6) Как подтягивать новые задания и правки преподавателя
 
 Когда в апстриме появился новый коммит (новые задачи/исправления):
 
@@ -78,7 +107,7 @@ git pull --rebase upstream main
 git push origin main
 
 # обновите свою рабочую ветку
-git checkout task-XX/<ваш_login>
+git checkout 202x-xx-xx-<task_name>/<login>
 git rebase main
 # если были конфликты — решите их, затем:
 git add <исправленные_файлы>
@@ -119,17 +148,7 @@ git reset --hard HEAD~1
 ```
 
 ---
-
-## 8) Правила
-
-- **Менять можно только** в `solutions/<task-id>/<login>/...`.
-- **Одна ветка — одна задача.** Несколько задач в одном PR не принимаются.
-- Перед PR всегда делайте `git pull --rebase upstream main`.
-- Коммиты должны быть осмысленными, без временных файлов.
-
----
-
-## 10) Шпаргалка команд
+## 8) Шпаргалка команд
 
 ```bash
 # статус и история
@@ -146,10 +165,10 @@ git pull --rebase upstream main
 git push origin main
 
 # работа с веткой задачи
-git switch -c task-XX/<login>   # создать
-git checkout task-XX/<login>    # перейти
-git rebase main                 # обновить задачную ветку
-git push --force-with-lease     # обновить PR после rebase
+git switch -c 202x-xx-xx-<task_name>/<login>   # создать
+git checkout 202x-xx-xx-<task_name>/<login>    # перейти
+git rebase main                                # обновить задачную ветку
+git push --force-with-lease                    # обновить PR после rebase
 ```
 
 Удачи и чистой истории коммитов!
